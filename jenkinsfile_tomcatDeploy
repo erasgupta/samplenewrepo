@@ -1,0 +1,64 @@
+peline {
+    agent {label 'mysshnode'}
+
+    tools {
+        maven "maven"
+        jdk "java8"
+    }
+    
+    stages {
+        stage('compile') {
+            steps {
+                // Get some code from a GitHub repository
+                git 'https://github.com/erasgupta/samplenewrepo.git'
+
+                // Run Maven on a Unix agent.
+                sh "mvn compile"
+            }
+        }
+        stage('codeReview') {
+            steps {
+                sh "mvn pmd:pmd"
+            }
+        }
+        stage('unit test') {
+            steps {
+                sh "mvn test"
+            }
+            post{
+                always{
+                    junit 'target/surefire-reports/*.xml'
+                }
+            }
+        }
+         stage('metric check') {
+            steps {
+                sh "mvn cobertura:cobertura -Dcobertura.report.format=xml"
+            }
+            post{
+                always{
+                    cobertura coberturaReportFile: 'target/site/cobertura/coverage.xml'
+                }
+            }
+        }
+        stage('Package') {
+            steps {
+                sh "mvn package"
+            }
+        }
+         stage('tempStage') {
+            steps {
+                sh 'cp /home/jenkins/jenkins_slave/workspace/testpipeline/target/addressbook.war /tmp/'
+                sh 'chmod 777 /tmp/addressbook.war'
+            }
+        }
+        
+        stage('Deploy') {
+            agent any
+            steps {
+                ansiblePlaybook credentialsId: 'ansiblekey', inventory: '/etc/ansible/hosts', playbook: '/etc/ansible/deploy.yml'
+            }
+        }
+    }
+}
+
