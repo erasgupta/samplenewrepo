@@ -8,7 +8,6 @@ spec:
     app: kube-service
   ports:
   - protocol: TCP
-    port: 8080
     nodePort: 30000
 
 ---
@@ -35,11 +34,11 @@ spec:
       - name: kube-addressbook
         image: erashish01/myaddressapp
         ports:
-        - containerPort: 8080
+        - containerPort: 30000
         livenessProbe:
           httpGet:
             path: /
-            port: 8080
+            port: 30000
           initialDelaySeconds: 15
           timeoutSeconds: 1
           periodSeconds: 10
