@@ -20,7 +20,7 @@ metadata:
   labels:
     app: kube-deployment
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: kube-deployment
@@ -33,6 +33,6 @@ spec:
     spec:
       containers:
       - name: kube-addressbook
-        image: erashish01/myaddressapp:3
+        image: erashish01/myaddressapp
         ports:
         - containerPort: 8080
