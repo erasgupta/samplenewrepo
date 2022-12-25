@@ -3,13 +3,16 @@ apiVersion: v1
 metadata:
   name: kube-service
 spec:
-  type: NodePort
+  type: LoadBalancer
+  externalIPs:
+  - 3.238.190.129
   selector:
-    app: kube-deployment
+    app: kube-service
   ports:
   - protocol: TCP
     port: 8080
-    nodePort: 30562
+    nodePort: 30000
+
 ---
 
 apiVersion: apps/v1
@@ -33,3 +36,5 @@ spec:
       containers:
       - name: kube-addressbook
         image: erashish01/myaddressapp
+        ports:
+        - containerPort: 8080
