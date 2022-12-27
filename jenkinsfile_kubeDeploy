@@ -1,0 +1,43 @@
+pipeline {
+    agent any
+
+    tools {
+        maven "maven"
+        jdk "java8"
+    }
+    
+    stages {
+        stage('Build') {
+            steps {
+                git 'https://github.com/erasgupta/samplenewrepo.git'
+                sh "mvn clean install"
+            }
+        }
+        
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    app = docker.build('erashish01/myaddressapp')
+                }
+            }
+        }
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    withDockerRegistry([ credentialsId: "dockerHub", url: "" ]) {
+                        app.push("${env.BUILD_NUMBER}")
+                        app.push("latest")
+                    }
+                }
+            }
+        }
+        
+        stage('Deploy') {
+          steps {
+           withKubeConfig([credentialsId: 'jenkins-robot', serverUrl: 'https://172.31.93.54:6443']) {
+            sh 'kubectl apply -f kube-deploy.yml'
+           }
+           }
+        }
+    }
+}
